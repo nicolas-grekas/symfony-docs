@@ -76,6 +76,33 @@ jobs:
                 with:
                     args: --short --error-format=github --cache-file=/github/workspace/.cache/doctor-rst.cache
 
+    attributes-reference:
+        name: Attributes reference
+
+        if: github.event_name == 'pull_request' || github.repository == 'symfony/symfony-docs'
+
+        runs-on: ubuntu-latest
+
+        steps:
+            -   name: "Checkout"
+                uses: actions/checkout@v6
+
+            -   name: "Checkout symfony/symfony"
+                uses: actions/checkout@v6
+                with:
+                    repository: symfony/symfony
+                    ref: ${{ github.base_ref || github.ref_name }}
+                    path: _symfony
+
+            -   name: "Set-up PHP"
+                uses: shivammathur/setup-php@v2
+                with:
+                    php-version: 8.4
+                    coverage: none
+
+            -   name: "Compare reference/attributes.rst with the code"
+                run: php _build/check-attributes.php _symfony
+
     symfony-code-block-checker:
         name: Code Blocks
 
